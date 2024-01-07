@@ -77,6 +77,12 @@ class PlacePicker extends StatefulWidget {
     this.onMapTypeChanged,
     this.zoomGesturesEnabled = true,
     this.zoomControlsEnabled = false,
+    this.hideBackButton = false,
+    this.autocompletePrefixIcon = const Icon(Icons.search),
+    this.autocompleteBorderRadius = const BorderRadius.all(Radius.circular(20)),
+    this.autocompleteElevation = 4,
+    this.autocompletePadding = const EdgeInsets.all(4),
+    this.autocompleteContentPadding,
   }) : super(key: key);
 
   final String apiKey;
@@ -232,6 +238,24 @@ class PlacePicker extends StatefulWidget {
   /// Allow user to make visible the zoom button
   final bool zoomControlsEnabled;
 
+  /// Hide back button
+  final bool hideBackButton;
+
+  /// Autocomplete prefix icon
+  final Widget? autocompletePrefixIcon;
+
+  /// Autocomplete border radius
+  final BorderRadius autocompleteBorderRadius;
+
+  /// The elevation of the autocomplete overlay.
+  final double autocompleteElevation;
+
+  /// The padding of the autocomplete box.
+  final EdgeInsetsGeometry autocompletePadding;
+
+  /// Padding of the [TextField] autocomplete content.
+  final EdgeInsetsGeometry? autocompleteContentPadding;
+
   @override
   _PlacePickerState createState() => _PlacePickerState();
 }
@@ -347,56 +371,65 @@ class _PlacePickerState extends State<PlacePicker> {
     return Row(
       children: <Widget>[
         SizedBox(width: 15),
-        provider!.placeSearchingState == SearchingState.Idle &&
-                (widget.automaticallyImplyAppBarLeading ||
-                    widget.onTapBack != null)
-            ? IconButton(
-                onPressed: () {
-                  if (!showIntroModal ||
-                      widget.introModalWidgetBuilder == null) {
-                    provider?.debounceTimer?.cancel();
-                    if (widget.onTapBack != null) {
-                      widget.onTapBack!();
-                      return;
+        if (!widget.hideBackButton)
+          provider!.placeSearchingState == SearchingState.Idle &&
+                  (widget.automaticallyImplyAppBarLeading ||
+                      widget.onTapBack != null)
+              ? IconButton(
+                  onPressed: () {
+                    if (!showIntroModal ||
+                        widget.introModalWidgetBuilder == null) {
+                      provider?.debounceTimer?.cancel();
+                      if (widget.onTapBack != null) {
+                        widget.onTapBack!();
+                        return;
+                      }
+                      Navigator.maybePop(context);
                     }
-                    Navigator.maybePop(context);
-                  }
-                },
-                icon: Icon(
-                  Platform.isIOS ? Icons.arrow_back_ios : Icons.arrow_back,
-                ),
-                color: Colors.black.withAlpha(128),
-                padding: EdgeInsets.zero)
-            : Container(),
+                  },
+                  icon: Icon(
+                    Platform.isIOS ? Icons.arrow_back_ios : Icons.arrow_back,
+                  ),
+                  color: Colors.black.withAlpha(128),
+                  padding: EdgeInsets.zero)
+              : Container(),
         Expanded(
           child: AutoCompleteSearch(
-              appBarKey: appBarKey,
-              searchBarController: searchBarController,
-              sessionToken: provider!.sessionToken,
-              hintText: widget.hintText,
-              searchingText: widget.searchingText,
-              debounceMilliseconds: widget.autoCompleteDebounceInMilliseconds,
-              onPicked: (prediction) {
-                if (mounted) {
-                  _pickPrediction(prediction);
-                }
-              },
-              onSearchFailed: (status) {
-                if (widget.onAutoCompleteFailed != null) {
-                  widget.onAutoCompleteFailed!(status);
-                }
-              },
-              autocompleteOffset: widget.autocompleteOffset,
-              autocompleteRadius: widget.autocompleteRadius,
-              autocompleteLanguage: widget.autocompleteLanguage,
-              autocompleteComponents: widget.autocompleteComponents,
-              autocompleteTypes: widget.autocompleteTypes,
-              strictbounds: widget.strictbounds,
-              region: widget.region,
-              initialSearchString: widget.initialSearchString,
-              searchForInitialValue: widget.searchForInitialValue,
-              autocompleteOnTrailingWhitespace:
-                  widget.autocompleteOnTrailingWhitespace),
+            appBarKey: appBarKey,
+            searchBarController: searchBarController,
+            sessionToken: provider!.sessionToken,
+            hintText: widget.hintText,
+            searchingText: widget.searchingText,
+            hideBackButton: widget.hideBackButton,
+            debounceMilliseconds: widget.autoCompleteDebounceInMilliseconds,
+            elevation: widget.autocompleteElevation,
+            padding: widget.autocompletePadding,
+            onPicked: (prediction) {
+              if (mounted) {
+                _pickPrediction(prediction);
+              }
+            },
+            onSearchFailed: (status) {
+              if (widget.onAutoCompleteFailed != null) {
+                widget.onAutoCompleteFailed!(status);
+              }
+            },
+            autocompleteOffset: widget.autocompleteOffset,
+            autocompleteRadius: widget.autocompleteRadius,
+            autocompleteLanguage: widget.autocompleteLanguage,
+            autocompleteComponents: widget.autocompleteComponents,
+            autocompleteTypes: widget.autocompleteTypes,
+            strictbounds: widget.strictbounds,
+            region: widget.region,
+            initialSearchString: widget.initialSearchString,
+            searchForInitialValue: widget.searchForInitialValue,
+            autocompleteOnTrailingWhitespace:
+                widget.autocompleteOnTrailingWhitespace,
+            borderRadius: widget.autocompleteBorderRadius,
+            prefixIcon: widget.autocompletePrefixIcon,
+            contentPadding:
+                widget.autocompleteContentPadding ?? EdgeInsets.zero,
+          ),
         ),
         SizedBox(width: 5),
       ],

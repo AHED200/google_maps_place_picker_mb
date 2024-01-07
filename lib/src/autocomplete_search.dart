@@ -10,30 +10,35 @@ import 'package:flutter_google_maps_webservices/places.dart';
 import 'package:provider/provider.dart';
 
 class AutoCompleteSearch extends StatefulWidget {
-  const AutoCompleteSearch(
-      {Key? key,
-      required this.sessionToken,
-      required this.onPicked,
-      required this.appBarKey,
-      this.hintText = "Search here",
-      this.searchingText = "Searching...",
-      this.hidden = false,
-      this.height = 40,
-      this.contentPadding = EdgeInsets.zero,
-      this.debounceMilliseconds,
-      this.onSearchFailed,
-      required this.searchBarController,
-      this.autocompleteOffset,
-      this.autocompleteRadius,
-      this.autocompleteLanguage,
-      this.autocompleteComponents,
-      this.autocompleteTypes,
-      this.strictbounds,
-      this.region,
-      this.initialSearchString,
-      this.searchForInitialValue,
-      this.autocompleteOnTrailingWhitespace})
-      : super(key: key);
+  const AutoCompleteSearch({
+    Key? key,
+    required this.sessionToken,
+    required this.onPicked,
+    required this.appBarKey,
+    this.hintText = "Search here",
+    this.searchingText = "Searching...",
+    this.hidden = false,
+    this.height = 40,
+    this.contentPadding = EdgeInsets.zero,
+    this.debounceMilliseconds,
+    this.onSearchFailed,
+    required this.searchBarController,
+    this.autocompleteOffset,
+    this.autocompleteRadius,
+    this.autocompleteLanguage,
+    this.autocompleteComponents,
+    this.autocompleteTypes,
+    this.strictbounds,
+    this.region,
+    this.initialSearchString,
+    this.searchForInitialValue,
+    this.autocompleteOnTrailingWhitespace,
+    required this.borderRadius,
+    required this.prefixIcon,
+    required this.hideBackButton,
+    required this.elevation,
+    this.padding,
+  }) : super(key: key);
 
   final String? sessionToken;
   final String? hintText;
@@ -56,6 +61,12 @@ class AutoCompleteSearch extends StatefulWidget {
   final String? initialSearchString;
   final bool? searchForInitialValue;
   final bool? autocompleteOnTrailingWhitespace;
+  final BorderRadius borderRadius;
+  final Widget? prefixIcon;
+  final double elevation;
+
+  final bool hideBackButton;
+  final EdgeInsetsGeometry? padding;
 
   @override
   AutoCompleteSearchState createState() => AutoCompleteSearchState();
@@ -99,24 +110,31 @@ class AutoCompleteSearchState extends State<AutoCompleteSearch> {
   @override
   Widget build(BuildContext context) {
     return !widget.hidden
-        ? ChangeNotifierProvider.value(
-            value: provider,
-            child: RoundedFrame(
-              height: widget.height,
-              padding: const EdgeInsets.only(right: 10),
-              color: Theme.of(context).brightness == Brightness.dark
-                  ? Colors.black54
-                  : Colors.white,
-              borderRadius: BorderRadius.circular(20),
-              elevation: 4.0,
-              child: Row(
-                children: <Widget>[
-                  SizedBox(width: 10),
-                  Icon(Icons.search),
-                  SizedBox(width: 10),
-                  Expanded(child: _buildSearchTextField()),
-                  _buildTextClearIcon(),
-                ],
+        ? Padding(
+            padding: widget.padding ?? EdgeInsets.zero,
+            child: ChangeNotifierProvider.value(
+              value: provider,
+              child: RoundedFrame(
+                height: widget.height,
+                padding: widget.hideBackButton
+                    ? EdgeInsets.zero
+                    : const EdgeInsets.only(right: 10),
+                color: Theme.of(context).brightness == Brightness.dark
+                    ? Colors.black54
+                    : Colors.white,
+                borderRadius: widget.borderRadius,
+                elevation: widget.elevation,
+                child: Row(
+                  children: <Widget>[
+                    if (widget.prefixIcon != null) ...[
+                      SizedBox(width: 10),
+                      widget.prefixIcon!,
+                      SizedBox(width: 10),
+                    ],
+                    Expanded(child: _buildSearchTextField()),
+                    _buildTextClearIcon(),
+                  ],
+                ),
               ),
             ),
           )
@@ -147,7 +165,7 @@ class AutoCompleteSearchState extends State<AutoCompleteSearch> {
         builder: (_, data, __) {
           if (data.length > 0) {
             return Padding(
-              padding: const EdgeInsets.only(right: 8.0),
+              padding: const EdgeInsets.symmetric(horizontal: 8.0),
               child: GestureDetector(
                 child: Icon(
                   Icons.clear,
